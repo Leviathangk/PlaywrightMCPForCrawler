@@ -14,7 +14,7 @@ import {
   handleNavigate,
   handleClick,
   handleType,
-} from './tools.js';
+} from './tools/index.js';
 
 /**
  * Main entry point

@@ -157,7 +157,7 @@
     - 启动 MCP Server
     - _Requirements: 9.2_
 
-- [x] 7. 配置 npm 包发布
+- [ ] 7. 配置 npm 包发布
   - [x] 7.1 配置 package.json 的 bin 字段
     - 设置可执行文件入口
     - 配置 npm scripts（build, test）
@@ -169,5 +169,5 @@
     - 列出所有可用工具和参数
     - _Requirements: 9.1_
 
-- [-] 8. 最终检查点
+- [x] 8. 最终检查点
   - 确保所有测试通过，如有问题请询问用户
