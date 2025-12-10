@@ -171,34 +171,34 @@ export async function handleFindElementByText(
           let text = '';
           for (const node of element.childNodes) {
             if (node.nodeType === 3) { // TEXT_NODE
-              text += node.textContent?.trim() || '';
+              text += node.textContent || '';
             }
           }
-          return text;
+          return text.trim();
         }
 
         function matchesText(element: any, searchText: string, exact: boolean): { matches: boolean; score: number } {
           const el = element;
           
-          // Get different text sources
+          // Get different text sources and trim them
           const directText = getDirectText(el);
-          const innerText = el.innerText || '';
-          const ariaLabel = el.getAttribute('aria-label') || '';
-          const title = el.getAttribute('title') || '';
-          const placeholder = el.getAttribute('placeholder') || '';
+          const innerText = (el.innerText || '').trim();
+          const ariaLabel = (el.getAttribute('aria-label') || '').trim();
+          const title = (el.getAttribute('title') || '').trim();
+          const placeholder = (el.getAttribute('placeholder') || '').trim();
 
-          const search = searchText.toLowerCase();
+          const search = searchText.trim().toLowerCase();
           
           // Score system: higher score = better match
           let score = 0;
           let matches = false;
 
           if (exact) {
-            // Exact match
+            // Exact match (after trimming)
             if (directText.toLowerCase() === search) {
               matches = true;
               score = 100; // Best: direct text exact match
-            } else if (innerText.toLowerCase().trim() === search) {
+            } else if (innerText.toLowerCase() === search) {
               matches = true;
               score = 90; // Good: innerText exact match
             } else if (ariaLabel.toLowerCase() === search || title.toLowerCase() === search || placeholder.toLowerCase() === search) {
@@ -222,39 +222,6 @@ export async function handleFindElementByText(
           return { matches, score };
         }
 
-        function getXPath(element: any): string {
-          if (element.id) {
-            return `//*[@id="${element.id}"]`;
-          }
-          
-          const parts: string[] = [];
-          let current = element;
-          
-          while (current && current.nodeType === 1) {
-            let index = 1;
-            let sibling = current.previousSibling;
-            
-            while (sibling) {
-              if (sibling.nodeType === 1 && sibling.tagName === current.tagName) {
-                index++;
-              }
-              sibling = sibling.previousSibling;
-            }
-            
-            const tagName = current.tagName.toLowerCase();
-            const part = index > 1 ? `${tagName}[${index}]` : tagName;
-            parts.unshift(part);
-            
-            if (current.tagName.toLowerCase() === 'body') {
-              break;
-            }
-            
-            current = current.parentNode;
-          }
-          
-          return '/' + parts.join('/');
-        }
-
         // Define selectors based on element type
         let selectors: string[];
         if (elementType === 'link') {
@@ -271,21 +238,28 @@ export async function handleFindElementByText(
           // @ts-ignore - browser context
           const elements = document.querySelectorAll(selector);
           for (const element of elements) {
-            if (matchesText(element, searchText, exact)) {
+            const matchResult = matchesText(element, searchText, exact);
+            if (matchResult.matches) {
               const visible = isVisible(element);
               matches.push({
                 selector: getSelector(element),
-                text: element.innerText?.trim().substring(0, 100) || '',
+                text: (element.innerText || element.textContent || '').trim().substring(0, 100),
                 tag: element.tagName.toLowerCase(),
                 visible,
                 clickable: true,
+                score: matchResult.score,
               });
             }
           }
         }
 
-        // Sort by visibility (visible first)
-        matches.sort((a, b) => (b.visible ? 1 : 0) - (a.visible ? 1 : 0));
+        // Sort by score (higher first), then by visibility
+        matches.sort((a, b) => {
+          if (a.score !== b.score) {
+            return b.score - a.score; // Higher score first
+          }
+          return (b.visible ? 1 : 0) - (a.visible ? 1 : 0); // Visible first
+        });
 
         return matches.length > 0 ? matches[0] : null;
       },

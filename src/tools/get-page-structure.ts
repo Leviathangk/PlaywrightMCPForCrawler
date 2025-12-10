@@ -288,24 +288,46 @@ export async function handleGetPageStructure(
 
         // First, collect all interactive elements
         const interactiveElements: any[] = [];
+        const allFoundElements: any[] = []; // 用于日志记录所有找到的元素
+        
         for (const selector of interactiveSelectors) {
           const elements = root.querySelectorAll(selector);
+          console.log(`[DEBUG] 选择器 "${selector}" 找到 ${elements.length} 个元素`);
+          
           for (const element of elements) {
-            if (elementCount >= maxElements) break;
             const visible = isVisible(element);
+            const text = getText(element);
+            const tag = element.tagName.toLowerCase();
+            const elementSelector = getSelector(element);
+            
+            // 记录所有找到的元素（用于调试）
+            allFoundElements.push({
+              selector: selector,
+              tag: tag,
+              text: text || '(无文本)',
+              visible: visible,
+              elementSelector: elementSelector,
+              outerHTML: element.outerHTML?.substring(0, 200) || '', // 前200字符
+            });
+            
+            if (elementCount >= maxElements) break;
             if (!includeHidden && !visible) continue;
 
             interactiveElements.push({
               type: element.getAttribute('role') || element.tagName.toLowerCase(),
-              text: getText(element),
-              selector: getSelector(element),
+              text: text,
+              selector: elementSelector,
               visible,
               clickable: true,
-              tag: element.tagName.toLowerCase(),
+              tag: tag,
             });
             elementCount++;
           }
         }
+        
+        // 打印所有找到的元素日志
+        console.log(`[DEBUG] 总共找到 ${allFoundElements.length} 个元素（过滤前）`);
+        console.log('[DEBUG] 所有元素详情:', JSON.stringify(allFoundElements, null, 2));
 
         return {
           elements: interactiveElements,
