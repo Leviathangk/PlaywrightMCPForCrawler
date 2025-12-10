@@ -6,6 +6,7 @@ export interface ServerConfig {
   headless: boolean;
   sessionTimeout: number; // milliseconds
   maxSessions: number;
+  executablePath?: string; // Optional path to browser executable
 }
 
 /**
@@ -47,6 +48,9 @@ export function parseConfig(args: string[]): ServerConfig {
       if (!isNaN(maxSessions) && maxSessions > 0) {
         config.maxSessions = maxSessions;
       }
+      i++;
+    } else if (arg === '--executable-path' && i + 1 < args.length) {
+      config.executablePath = args[i + 1];
       i++;
     }
   }

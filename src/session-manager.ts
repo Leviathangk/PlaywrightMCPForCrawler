@@ -54,16 +54,26 @@ export class SessionManager {
       return; // Already initialized
     }
 
+    // Prepare launch options
+    const launchOptions: any = {
+      headless: this.config.headless,
+    };
+
+    // Add executable path if provided
+    if (this.config.executablePath) {
+      launchOptions.executablePath = this.config.executablePath;
+    }
+
     // Launch browser based on configuration
     switch (this.config.browser) {
       case 'chromium':
-        this.browser = await chromium.launch({ headless: this.config.headless });
+        this.browser = await chromium.launch(launchOptions);
         break;
       case 'firefox':
-        this.browser = await firefox.launch({ headless: this.config.headless });
+        this.browser = await firefox.launch(launchOptions);
         break;
       case 'webkit':
-        this.browser = await webkit.launch({ headless: this.config.headless });
+        this.browser = await webkit.launch(launchOptions);
         break;
       default:
         throw new Error(`Unsupported browser type: ${this.config.browser}`);
