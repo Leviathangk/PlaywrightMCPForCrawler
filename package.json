@@ -1,27 +1,47 @@
 {
-  "name": "@modelcontextprotocol/server-playwright",
+  "name": "@leviathangk/playwright-mcp",
   "version": "0.1.0",
-  "description": "MCP server for browser automation using Playwright",
+  "description": "MCP server for browser automation and web scraping using Playwright. Supports network capture, page understanding, and AI-driven web interaction.",
   "type": "module",
   "bin": {
-    "mcp-server-playwright": "./build/index.js"
+    "playwright-mcp": "./build/index.js"
   },
+  "main": "./build/index.js",
+  "files": [
+    "build/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
     "test": "jest",
     "test:watch": "jest --watch",
     "start": "node build/index.js",
-    "dev": "tsc && node build/index.js"
+    "dev": "tsc && node build/index.js",
+    "prepublishOnly": "npm run build",
+    "publish-check": "node scripts/publish-check.js"
   },
   "keywords": [
     "mcp",
     "playwright",
     "browser-automation",
-    "model-context-protocol"
+    "model-context-protocol",
+    "web-scraping",
+    "crawler",
+    "network-capture",
+    "ai-automation"
   ],
-  "author": "",
+  "author": "Your Name <your.email@example.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leviathangk/playwright-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leviathangk/playwright-mcp/issues"
+  },
+  "homepage": "https://github.com/leviathangk/playwright-mcp#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
     "playwright": "^1.48.0",
