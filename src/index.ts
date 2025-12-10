@@ -18,6 +18,11 @@ import {
   handleGetRequests,
   handleGetRequestDetail,
   handleClearRequests,
+  handleGetPageStructure,
+  handleFindElementByText,
+  handleScreenshot,
+  handleWaitForElement,
+  handleGetTextContent,
 } from './tools/index.js';
 
 /**
@@ -279,6 +284,137 @@ async function main() {
             required: ['sessionId'],
           },
         },
+        {
+          name: 'get_page_structure',
+          description: 'Get the structure of interactive elements on the page. Returns clickable elements like links, buttons, and inputs with their text and selectors.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              selector: {
+                type: 'string',
+                description: 'Optional CSS selector to analyze only a specific region of the page',
+              },
+              includeHidden: {
+                type: 'boolean',
+                description: 'Whether to include hidden elements',
+                default: false,
+              },
+              maxElements: {
+                type: 'number',
+                description: 'Maximum number of elements to return',
+                default: 100,
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'find_element_by_text',
+          description: 'Find an element on the page by its text content. Returns the selector that can be used with click or type tools.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              text: {
+                type: 'string',
+                description: 'The text to search for',
+              },
+              exact: {
+                type: 'boolean',
+                description: 'Whether to match the text exactly',
+                default: false,
+              },
+              elementType: {
+                type: 'string',
+                enum: ['link', 'button', 'any'],
+                description: 'Type of element to search for',
+                default: 'any',
+              },
+            },
+            required: ['sessionId', 'text'],
+          },
+        },
+        {
+          name: 'screenshot',
+          description: 'Take a screenshot of the page or a specific element and save it to a file.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              path: {
+                type: 'string',
+                description: 'File path where the screenshot will be saved (e.g., "screenshots/page.png")',
+              },
+              selector: {
+                type: 'string',
+                description: 'Optional CSS selector to screenshot only a specific element',
+              },
+              fullPage: {
+                type: 'boolean',
+                description: 'Whether to take a full page screenshot',
+                default: false,
+              },
+            },
+            required: ['sessionId', 'path'],
+          },
+        },
+        {
+          name: 'wait_for_element',
+          description: 'Wait for an element to appear on the page. Useful for waiting for dynamic content to load.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              selector: {
+                type: 'string',
+                description: 'CSS selector of the element to wait for',
+              },
+              timeout: {
+                type: 'number',
+                description: 'Maximum time to wait in milliseconds',
+                default: 30000,
+              },
+              state: {
+                type: 'string',
+                enum: ['attached', 'detached', 'visible', 'hidden'],
+                description: 'Wait for element to reach this state',
+                default: 'visible',
+              },
+            },
+            required: ['sessionId', 'selector'],
+          },
+        },
+        {
+          name: 'get_text_content',
+          description: 'Get the text content of a specific element on the page.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              selector: {
+                type: 'string',
+                description: 'CSS selector of the element',
+              },
+            },
+            required: ['sessionId', 'selector'],
+          },
+        },
       ],
     };
   });
@@ -315,6 +451,21 @@ async function main() {
 
         case 'clear_requests':
           return await handleClearRequests(sessionManager, args);
+
+        case 'get_page_structure':
+          return await handleGetPageStructure(sessionManager, args);
+
+        case 'find_element_by_text':
+          return await handleFindElementByText(sessionManager, args);
+
+        case 'screenshot':
+          return await handleScreenshot(sessionManager, args);
+
+        case 'wait_for_element':
+          return await handleWaitForElement(sessionManager, args);
+
+        case 'get_text_content':
+          return await handleGetTextContent(sessionManager, args);
 
         default:
           return {

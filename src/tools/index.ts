@@ -7,3 +7,8 @@ export { handleSearchRequests } from './search-requests.js';
 export { handleGetRequests } from './get-requests.js';
 export { handleGetRequestDetail } from './get-request-detail.js';
 export { handleClearRequests } from './clear-requests.js';
+export { handleGetPageStructure } from './get-page-structure.js';
+export { handleFindElementByText } from './find-element-by-text.js';
+export { handleScreenshot } from './screenshot.js';
+export { handleWaitForElement } from './wait-for-element.js';
+export { handleGetTextContent } from './get-text-content.js';
