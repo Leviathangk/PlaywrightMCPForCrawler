@@ -16,3 +16,4 @@ export { handleQuerySelector } from './query-selector.js';
 export { handleGetPageContent } from './get-page-content.js';
 export { handleScroll } from './scroll.js';
 export { handleExecuteScript } from './execute-script.js';
+export { handleInstallBrowser } from './install-browser.js';

@@ -60,13 +60,13 @@ async function main() {
 
     // 1. 创建会话
     console.log('📝 创建浏览器会话...');
-    const session = await test.callTool('create_session');
+    const session = await test.callTool('browser_create_session');
     const sessionId = session.sessionId;
     console.log(`✅ 会话 ID: ${sessionId}\n`);
 
     // 2. 访问百度（简单页面）
     console.log('🌐 访问百度...');
-    await test.callTool('navigate', {
+    await test.callTool('browser_navigate', {
       sessionId: sessionId,
       url: 'https://www.baidu.com',
       waitUntil: 'networkidle'
@@ -75,7 +75,7 @@ async function main() {
 
     // 3. 获取页面结构
     console.log('🔍 获取页面结构...\n');
-    const structure = await test.callTool('get_page_structure', {
+    const structure = await test.callTool('browser_get_page_structure', {
       sessionId: sessionId,
       maxElements: 20
     });
@@ -96,7 +96,7 @@ async function main() {
     
     // 测试相对路径（应该失败）
     console.log('测试 1: 使用相对路径（应该失败）');
-    const result1 = await test.callTool('screenshot', {
+    const result1 = await test.callTool('browser_screenshot', {
       sessionId: sessionId,
       path: 'test.png'
     });
@@ -109,7 +109,7 @@ async function main() {
     // 测试绝对路径（应该成功）
     console.log('测试 2: 使用绝对路径（应该成功）');
     const absolutePath = process.cwd() + '\\test-screenshot.png';
-    const result2 = await test.callTool('screenshot', {
+    const result2 = await test.callTool('browser_screenshot', {
       sessionId: sessionId,
       path: absolutePath
     });
@@ -121,7 +121,7 @@ async function main() {
 
     // 5. 测试查找元素
     console.log('🔍 测试查找"百度一下"按钮...\n');
-    const element = await test.callTool('find_element_by_text', {
+    const element = await test.callTool('browser_find_element_by_text', {
       sessionId: sessionId,
       text: '百度一下'
     });
@@ -135,7 +135,7 @@ async function main() {
 
     // 6. 关闭会话
     console.log('🔒 关闭会话...');
-    await test.callTool('close_session', { sessionId: sessionId });
+    await test.callTool('browser_close_session', { sessionId: sessionId });
     console.log('✅ 测试完成！\n');
 
   } catch (error) {

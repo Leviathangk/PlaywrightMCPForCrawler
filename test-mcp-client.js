@@ -103,13 +103,13 @@ async function runTests() {
 
     // 测试 1: 创建会话
     console.log('【测试 1】创建会话');
-    const session = await client.callTool('create_session');
+    const session = await client.callTool('browser_create_session');
     const sessionId = session.sessionId;
     console.log(`会话 ID: ${sessionId}\n`);
 
     // 测试 2: 导航到百度
     console.log('【测试 2】导航到百度');
-    await client.callTool('navigate', {
+    await client.callTool('browser_navigate', {
       sessionId: sessionId,
       url: 'https://www.baidu.com',
       waitUntil: 'networkidle'
@@ -117,7 +117,7 @@ async function runTests() {
 
     // 测试 3: 输入搜索关键词
     console.log('【测试 3】输入搜索关键词');
-    await client.callTool('type', {
+    await client.callTool('browser_type', {
       sessionId: sessionId,
       selector: '#kw',
       text: 'MCP 协议测试'
@@ -125,7 +125,7 @@ async function runTests() {
 
     // 测试 4: 点击搜索按钮
     console.log('【测试 4】点击搜索按钮');
-    await client.callTool('click', {
+    await client.callTool('browser_click', {
       sessionId: sessionId,
       selector: '#su'
     });
@@ -136,21 +136,21 @@ async function runTests() {
 
     // 测试 5: 导航到必应
     console.log('【测试 5】导航到必应');
-    await client.callTool('navigate', {
+    await client.callTool('browser_navigate', {
       sessionId: sessionId,
       url: 'https://www.bing.com'
     });
 
     // 测试 6: 在必应搜索
     console.log('【测试 6】在必应搜索');
-    await client.callTool('type', {
+    await client.callTool('browser_type', {
       sessionId: sessionId,
       selector: '#sb_form_q',
       text: 'Playwright automation',
       clear: true
     });
 
-    await client.callTool('click', {
+    await client.callTool('browser_click', {
       sessionId: sessionId,
       selector: '#search_icon'
     });
@@ -161,7 +161,7 @@ async function runTests() {
 
     // 测试 7: 搜索网络请求
     console.log('【测试 7】搜索包含"百度"的请求');
-    const searchResults = await client.callTool('search_requests', {
+    const searchResults = await client.callTool('browser_search_requests', {
       sessionId: sessionId,
       keyword: '百度',
       searchIn: ['url', 'response'],
@@ -181,7 +181,7 @@ async function runTests() {
 
     // 测试 8: 获取所有请求
     console.log('\n【测试 8】获取所有 XHR/Fetch 请求');
-    const allRequests = await client.callTool('get_requests', {
+    const allRequests = await client.callTool('browser_get_requests', {
       sessionId: sessionId,
       filter: {
         resourceType: 'xhr'
@@ -200,7 +200,7 @@ async function runTests() {
     // 测试 9: 获取请求详情
     if (searchResults && searchResults.matches && searchResults.matches.length > 0) {
       console.log('\n【测试 9】获取第一个匹配请求的详细信息');
-      const requestDetail = await client.callTool('get_request_detail', {
+      const requestDetail = await client.callTool('browser_get_request_detail', {
         sessionId: sessionId,
         requestId: searchResults.matches[0].id
       });
@@ -216,7 +216,7 @@ async function runTests() {
 
     // 测试 10: 关闭会话
     console.log('【测试 10】关闭会话');
-    await client.callTool('close_session', {
+    await client.callTool('browser_close_session', {
       sessionId: sessionId
     });
 

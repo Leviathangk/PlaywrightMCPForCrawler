@@ -20,7 +20,7 @@ class DebugTest {
       args: [
         'build/index.js',
         '--browser', 'chromium',
-        '--executable-path', 'D:\\Download\\chrome-win\\chrome-win\\chrome.exe',
+        // '--executable-path', 'D:\\Download\\chrome-win\\chrome-win\\chrome.exe',
         '--headless', 'false'
       ]
     });
@@ -60,13 +60,13 @@ async function main() {
 
     // 1. 创建会话
     console.log('📝 创建浏览器会话...');
-    const session = await test.callTool('create_session');
+    const session = await test.callTool('browser_create_session');
     const sessionId = session.sessionId;
     console.log(`✅ 会话 ID: ${sessionId}\n`);
 
     // 2. 访问百度
     console.log('🌐 访问百度...');
-    await test.callTool('navigate', {
+    await test.callTool('browser_navigate', {
       sessionId: sessionId,
       url: 'https://www.baidu.com',
       waitUntil: 'networkidle'
@@ -75,7 +75,7 @@ async function main() {
 
     // 3. 获取所有可交互元素
     console.log('🔍 获取页面所有可交互元素...\n');
-    const structure = await test.callTool('get_page_structure', {
+    const structure = await test.callTool('browser_get_page_structure', {
       sessionId: sessionId,
       maxElements: 1000,  // 增加限制
       includeHidden: true  // 包括隐藏元素
@@ -159,7 +159,7 @@ async function main() {
 
     for (const testCase of tests) {
       console.log(`查找: "${testCase.text}" (类型: ${testCase.type})`);
-      const result = await test.callTool('find_element_by_text', {
+      const result = await test.callTool('browser_find_element_by_text', {
         sessionId: sessionId,
         text: testCase.text,
         elementType: testCase.type
@@ -179,7 +179,7 @@ async function main() {
 
     // 6. 关闭会话
     console.log('🔒 关闭会话...');
-    await test.callTool('close_session', { sessionId: sessionId });
+    await test.callTool('browser_close_session', { sessionId: sessionId });
     console.log('✅ 测试完成！\n');
 
   } catch (error) {

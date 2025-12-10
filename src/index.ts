@@ -27,6 +27,7 @@ import {
   handleGetPageContent,
   handleScroll,
   handleExecuteScript,
+  handleInstallBrowser,
 } from './tools/index.js';
 
 /**
@@ -61,6 +62,28 @@ async function main() {
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
       tools: [
+        {
+          name: 'browser_install',
+          description:
+            'Install Playwright browsers. This allows you to install chromium, firefox, webkit, or all browsers without manually running playwright install.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              browser: {
+                type: 'string',
+                enum: ['chromium', 'firefox', 'webkit', 'all'],
+                description: 'Which browser to install',
+                default: 'chromium',
+              },
+              withDeps: {
+                type: 'boolean',
+                description: 'Whether to install system dependencies (Linux only)',
+                default: false,
+              },
+            },
+            required: [],
+          },
+        },
         {
           name: 'browser_create_session',
           description:
@@ -541,6 +564,9 @@ async function main() {
 
     try {
       switch (name) {
+        case 'browser_install':
+          return await handleInstallBrowser(args);
+
         case 'browser_create_session':
           return await handleCreateSession(sessionManager);
 

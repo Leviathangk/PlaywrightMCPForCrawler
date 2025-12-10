@@ -60,14 +60,14 @@ async function main() {
 
     // 1. 创建会话
     console.log('📝 创建浏览器会话...');
-    const session = await test.callTool('create_session');
+    const session = await test.callTool('browser_create_session');
     const sessionId = session.sessionId;
     console.log(`✅ 会话 ID: ${sessionId}\n`);
 
     // 2. 访问目标页面
     console.log('🌐 访问浙江政府采购网...');
     const url = 'https://zfcg.czt.zj.gov.cn/site/category?excludeDistrictPrefix=false&isGov=true&parentId=600007&childrenCode=110-600268';
-    await test.callTool('navigate', {
+    await test.callTool('browser_navigate', {
       sessionId: sessionId,
       url: url,
       waitUntil: 'networkidle'
@@ -80,7 +80,7 @@ async function main() {
 
     // 4. 搜索包含目标文本的 API
     console.log('🔍 搜索包含"衢州市柯城区人民医院2025年12月第一次政府采购意向"的 API...\n');
-    const searchResults = await test.callTool('search_requests', {
+    const searchResults = await test.callTool('browser_search_requests', {
       sessionId: sessionId,
       keyword: '衢州市柯城区人民医院2025年12月第一次政府采购意向',
       searchIn: ['response'],
@@ -108,7 +108,7 @@ async function main() {
         console.log('📋 第一个匹配请求的详细信息:');
         console.log(`${'='.repeat(80)}\n`);
 
-        const detail = await test.callTool('get_request_detail', {
+        const detail = await test.callTool('browser_get_request_detail', {
           sessionId: sessionId,
           requestId: searchResults.matches[0].id
         });
@@ -149,7 +149,7 @@ async function main() {
 
       // 显示所有捕获的请求供参考
       console.log('📋 显示所有捕获的 API 请求（供参考）:\n');
-      const allRequests = await test.callTool('get_requests', {
+      const allRequests = await test.callTool('browser_get_requests', {
         sessionId: sessionId,
         filter: {
           resourceType: 'xhr'
@@ -171,7 +171,7 @@ async function main() {
 
     // 7. 关闭会话
     console.log('🔒 关闭会话...');
-    await test.callTool('close_session', { sessionId: sessionId });
+    await test.callTool('browser_close_session', { sessionId: sessionId });
     console.log('✅ 测试完成！\n');
 
   } catch (error) {

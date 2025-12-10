@@ -60,14 +60,14 @@ async function main() {
 
     // 1. 创建会话
     console.log('📝 创建浏览器会话...');
-    const session = await test.callTool('create_session');
+    const session = await test.callTool('browser_create_session');
     const sessionId = session.sessionId;
     console.log(`✅ 会话 ID: ${sessionId}\n`);
 
     // 2. 访问浙江政府采购网
     console.log('🌐 访问浙江政府采购网...');
     const url = 'https://zfcg.czt.zj.gov.cn/site/category?excludeDistrictPrefix=false&isGov=true&parentId=600007&childrenCode=110-600268';
-    await test.callTool('navigate', {
+    await test.callTool('browser_navigate', {
       sessionId: sessionId,
       url: url,
       waitUntil: 'networkidle'
@@ -76,7 +76,7 @@ async function main() {
 
     // 3. 获取页面结构
     console.log('🔍 分析页面结构...\n');
-    const structure = await test.callTool('get_page_structure', {
+    const structure = await test.callTool('browser_get_page_structure', {
       sessionId: sessionId,
       maxElements: 50
     });
@@ -93,7 +93,7 @@ async function main() {
 
     // 4. 查找"政府采购公告"元素
     console.log('🔍 查找"政府采购公告"元素...\n');
-    const element1 = await test.callTool('find_element_by_text', {
+    const element1 = await test.callTool('browser_find_element_by_text', {
       sessionId: sessionId,
       text: '政府采购公告'
     });
@@ -106,7 +106,7 @@ async function main() {
 
       // 5. 点击该元素
       console.log('🖱️  点击"政府采购公告"...');
-      await test.callTool('click', {
+      await test.callTool('browser_click', {
         sessionId: sessionId,
         selector: element1.selector
       });
@@ -119,7 +119,7 @@ async function main() {
 
       // 7. 查找"采购意向"
       console.log('🔍 查找"采购意向"元素...\n');
-      const element2 = await test.callTool('find_element_by_text', {
+      const element2 = await test.callTool('browser_find_element_by_text', {
         sessionId: sessionId,
         text: '采购意向'
       });
@@ -131,7 +131,7 @@ async function main() {
 
         // 8. 点击"采购意向"
         console.log('🖱️  点击"采购意向"...');
-        await test.callTool('click', {
+        await test.callTool('browser_click', {
           sessionId: sessionId,
           selector: element2.selector
         });
@@ -143,7 +143,7 @@ async function main() {
         // 10. 截图
         console.log('📸 截图保存...');
         const screenshotPath = process.cwd() + '\\screenshots\\result.png';
-        await test.callTool('screenshot', {
+        await test.callTool('browser_screenshot', {
           sessionId: sessionId,
           path: screenshotPath,
           fullPage: true
@@ -152,7 +152,7 @@ async function main() {
 
         // 11. 获取右侧内容
         console.log('📄 获取右侧内容区域文本...\n');
-        const content = await test.callTool('get_text_content', {
+        const content = await test.callTool('browser_get_text_content', {
           sessionId: sessionId,
           selector: '.right-content, .content, .main-content, body'
         });
@@ -172,7 +172,7 @@ async function main() {
 
     // 13. 关闭会话
     console.log('🔒 关闭会话...');
-    await test.callTool('close_session', { sessionId: sessionId });
+    await test.callTool('browser_close_session', { sessionId: sessionId });
     console.log('✅ 测试完成！\n');
 
   } catch (error) {
