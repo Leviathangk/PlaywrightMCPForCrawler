@@ -159,8 +159,63 @@ async function runTests() {
     console.log('⏳ 等待 5 秒观察结果...\n');
     await new Promise(resolve => setTimeout(resolve, 5000));
 
-    // 测试 7: 关闭会话
-    console.log('【测试 7】关闭会话');
+    // 测试 7: 搜索网络请求
+    console.log('【测试 7】搜索包含"百度"的请求');
+    const searchResults = await client.callTool('search_requests', {
+      sessionId: sessionId,
+      keyword: '百度',
+      searchIn: ['url', 'response'],
+      limit: 5
+    });
+
+    if (searchResults && searchResults.matches) {
+      console.log(`找到 ${searchResults.total} 个匹配，显示前 ${searchResults.returned} 个:`);
+      searchResults.matches.forEach((match, index) => {
+        console.log(`\n  ${index + 1}. ${match.method} ${match.url}`);
+        console.log(`     匹配位置: ${match.matchedIn}`);
+        if (match.curl) {
+          console.log(`     curl 命令:\n     ${match.curl.substring(0, 100)}...`);
+        }
+      });
+    }
+
+    // 测试 8: 获取所有请求
+    console.log('\n【测试 8】获取所有 XHR/Fetch 请求');
+    const allRequests = await client.callTool('get_requests', {
+      sessionId: sessionId,
+      filter: {
+        resourceType: 'xhr'
+      },
+      limit: 10
+    });
+
+    if (allRequests && allRequests.requests) {
+      console.log(`共 ${allRequests.total} 个请求，显示最近 ${allRequests.returned} 个:`);
+      allRequests.requests.forEach((req, index) => {
+        console.log(`  ${index + 1}. [${req.method}] ${req.url.substring(0, 80)}...`);
+        console.log(`     状态: ${req.status} ${req.statusText}`);
+      });
+    }
+
+    // 测试 9: 获取请求详情
+    if (searchResults && searchResults.matches && searchResults.matches.length > 0) {
+      console.log('\n【测试 9】获取第一个匹配请求的详细信息');
+      const requestDetail = await client.callTool('get_request_detail', {
+        sessionId: sessionId,
+        requestId: searchResults.matches[0].id
+      });
+
+      if (requestDetail) {
+        console.log(`\n完整 curl 命令:\n${requestDetail.curl}\n`);
+      }
+    }
+
+    // 等待观察
+    console.log('⏳ 等待 3 秒...\n');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // 测试 10: 关闭会话
+    console.log('【测试 10】关闭会话');
     await client.callTool('close_session', {
       sessionId: sessionId
     });

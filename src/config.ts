@@ -7,6 +7,7 @@ export interface ServerConfig {
   sessionTimeout: number; // milliseconds
   maxSessions: number;
   executablePath?: string; // Optional path to browser executable
+  maxNetworkRequests?: number; // Maximum network requests to store per session
 }
 
 /**
@@ -17,6 +18,7 @@ export const DEFAULT_CONFIG: ServerConfig = {
   headless: false,
   sessionTimeout: 300000, // 5 minutes
   maxSessions: 10,
+  maxNetworkRequests: 1000, // Store up to 1000 requests per session
 };
 
 /**
@@ -51,6 +53,12 @@ export function parseConfig(args: string[]): ServerConfig {
       i++;
     } else if (arg === '--executable-path' && i + 1 < args.length) {
       config.executablePath = args[i + 1];
+      i++;
+    } else if (arg === '--max-network-requests' && i + 1 < args.length) {
+      const maxNetworkRequests = parseInt(args[i + 1], 10);
+      if (!isNaN(maxNetworkRequests) && maxNetworkRequests > 0) {
+        config.maxNetworkRequests = maxNetworkRequests;
+      }
       i++;
     }
   }

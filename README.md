@@ -86,6 +86,7 @@ npm start
 | `--headless` | boolean | `false` | 是否使用无头模式（true/false） |
 | `--session-timeout` | number | `300000` | 会话超时时间（毫秒），默认 5 分钟 |
 | `--max-sessions` | number | `10` | 最大并发会话数 |
+| `--max-network-requests` | number | `1000` | 每个会话最多保存的网络请求数 |
 | `--executable-path` | string | 无 | 浏览器可执行文件路径（可选）。如不指定则使用 Playwright 自带浏览器 |
 
 ### 常见浏览器路径
@@ -142,20 +143,22 @@ npm run dev -- --executable-path "C:\Program Files\Google\Chrome\Application\chr
 
 ## 可用工具
 
-### create_session
-创建新的浏览器会话。
+### 基础操作
+
+#### create_session
+创建新的浏览器会话。**会话创建后会自动开始捕获所有网络请求。**
 
 **返回值：**
 - `sessionId`：唯一会话标识符
 - `expiresAt`：会话过期时间戳
 
-### close_session
+#### close_session
 关闭现有浏览器会话。
 
 **参数：**
 - `sessionId`（必需）：要关闭的会话 ID
 
-### navigate
+#### navigate
 在指定会话中导航到 URL。
 
 **参数：**
@@ -170,7 +173,7 @@ npm run dev -- --executable-path "C:\Program Files\Google\Chrome\Application\chr
 - `url`：最终 URL（重定向后）
 - `status`：HTTP 状态码
 
-### click
+#### click
 点击页面上的元素。
 
 **参数：**
@@ -180,7 +183,7 @@ npm run dev -- --executable-path "C:\Program Files\Google\Chrome\Application\chr
 - `force`（可选）：即使元素不可操作也强制点击
 - `clickCount`（可选）：点击次数（默认：1）
 
-### type
+#### type
 在输入元素中输入文本。
 
 **参数：**
@@ -190,6 +193,85 @@ npm run dev -- --executable-path "C:\Program Files\Google\Chrome\Application\chr
 - `delay`（可选）：按键之间的延迟（毫秒）
 - `timeout`（可选）：超时时间（毫秒）
 - `clear`（可选）：输入前是否清空（默认：false）
+
+### 网络请求捕获（爬虫专用）
+
+会话创建后会自动捕获所有网络请求，无需手动开启。非常适合爬虫场景：打开页面后直接搜索关键词定位 API。
+
+#### search_requests
+根据关键词搜索网络请求（支持正则表达式）。
+
+**参数：**
+- `sessionId`（必需）：会话 ID
+- `keyword`（必需）：搜索关键词
+- `searchIn`（可选）：搜索范围，数组：`['url', 'request', 'response']`，默认 `['url', 'response']`
+- `isRegex`（可选）：是否使用正则表达式，默认 `false`
+- `limit`（可选）：返回结果数量，默认 `10`
+
+**返回值：**
+- `total`：匹配总数
+- `returned`：返回数量
+- `matches`：匹配结果数组
+  - `id`：请求 ID
+  - `url`：请求 URL
+  - `method`：HTTP 方法
+  - `matchedIn`：匹配位置（url/request/response）
+  - `matchedText`：匹配的文本片段
+  - `curl`：curl 命令
+  - `request`：请求详情
+  - `response`：响应详情
+
+**使用示例：**
+```javascript
+// 搜索响应中包含"用户列表"的 API
+await callTool('search_requests', {
+  sessionId: sessionId,
+  keyword: '用户列表',
+  searchIn: ['response']
+});
+
+// 使用正则搜索所有 /api/ 开头的请求
+await callTool('search_requests', {
+  sessionId: sessionId,
+  keyword: '^https://.*\\/api\\/',
+  searchIn: ['url'],
+  isRegex: true
+});
+```
+
+#### get_requests
+获取所有捕获的网络请求（可选过滤）。
+
+**参数：**
+- `sessionId`（必需）：会话 ID
+- `filter`（可选）：过滤条件
+  - `method`：HTTP 方法（GET、POST 等）
+  - `urlContains`：URL 包含的字符串
+  - `resourceType`：资源类型（xhr、fetch、document 等）
+  - `statusCode`：HTTP 状态码
+- `limit`（可选）：返回数量，默认 `50`
+
+**返回值：**
+- `total`：总请求数
+- `returned`：返回数量
+- `requests`：请求列表（简化信息）
+
+#### get_request_detail
+获取单个请求的完整详情，包括 curl 命令。
+
+**参数：**
+- `sessionId`（必需）：会话 ID
+- `requestId`（必需）：请求 ID（从 search_requests 或 get_requests 获取）
+
+**返回值：**
+- 完整的请求和响应信息
+- `curl`：可直接执行的 curl 命令
+
+#### clear_requests
+清空会话的网络请求历史（用于长时间运行的会话）。
+
+**参数：**
+- `sessionId`（必需）：会话 ID
 
 ## 错误处理
 

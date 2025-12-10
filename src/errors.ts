@@ -1,5 +1,7 @@
 import { ErrorResponse } from './session-manager.js';
 
+export type { ErrorResponse } from './session-manager.js';
+
 export const ErrorCodes = {
   SESSION_NOT_FOUND: 'SESSION_NOT_FOUND',
   SESSION_EXPIRED: 'SESSION_EXPIRED',

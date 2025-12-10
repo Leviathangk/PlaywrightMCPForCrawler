@@ -1,6 +1,7 @@
 import { Browser, BrowserContext, Page, chromium, firefox, webkit } from 'playwright';
 import { v4 as uuidv4 } from 'uuid';
 import { ServerConfig } from './config.js';
+import { NetworkCapture } from './network-capture.js';
 
 /**
  * Session context containing browser context and page
@@ -12,6 +13,7 @@ export interface SessionContext {
   createdAt: number;
   expiresAt: number;
   timeoutHandle: NodeJS.Timeout;
+  networkCapture: NetworkCapture;
 }
 
 /**
@@ -104,6 +106,25 @@ export class SessionManager {
     const context = await this.browser!.newContext();
     const page = await context.newPage();
 
+    // Create network capture
+    const networkCapture = new NetworkCapture(this.config.maxNetworkRequests || 1000);
+
+    // Set up network monitoring
+    const requestMap = new Map<string, string>(); // Map request URL to request ID
+
+    page.on('request', (request) => {
+      const requestId = networkCapture.addRequest(request);
+      requestMap.set(request.url(), requestId);
+    });
+
+    page.on('response', async (response) => {
+      const requestId = requestMap.get(response.url());
+      if (requestId) {
+        await networkCapture.updateResponse(requestId, response);
+        requestMap.delete(response.url());
+      }
+    });
+
     // Calculate expiration time
     const createdAt = Date.now();
     const expiresAt = createdAt + this.config.sessionTimeout;
@@ -121,6 +142,7 @@ export class SessionManager {
       createdAt,
       expiresAt,
       timeoutHandle,
+      networkCapture,
     };
 
     this.sessions.set(sessionId, session);

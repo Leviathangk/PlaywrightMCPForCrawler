@@ -3,3 +3,7 @@ export { handleCloseSession } from './close-session.js';
 export { handleNavigate } from './navigate.js';
 export { handleClick } from './click.js';
 export { handleType } from './type.js';
+export { handleSearchRequests } from './search-requests.js';
+export { handleGetRequests } from './get-requests.js';
+export { handleGetRequestDetail } from './get-request-detail.js';
+export { handleClearRequests } from './clear-requests.js';

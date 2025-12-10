@@ -14,6 +14,10 @@ import {
   handleNavigate,
   handleClick,
   handleType,
+  handleSearchRequests,
+  handleGetRequests,
+  handleGetRequestDetail,
+  handleClearRequests,
 } from './tools/index.js';
 
 /**
@@ -166,6 +170,115 @@ async function main() {
             required: ['sessionId', 'selector', 'text'],
           },
         },
+        {
+          name: 'search_requests',
+          description: 'Search captured network requests by keyword (supports regex). Useful for finding API endpoints that contain specific data.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              keyword: {
+                type: 'string',
+                description: 'Keyword to search for',
+              },
+              searchIn: {
+                type: 'array',
+                items: {
+                  type: 'string',
+                  enum: ['url', 'request', 'response'],
+                },
+                description: 'Where to search: url, request body, or response body',
+                default: ['url', 'response'],
+              },
+              isRegex: {
+                type: 'boolean',
+                description: 'Whether the keyword is a regular expression',
+                default: false,
+              },
+              limit: {
+                type: 'number',
+                description: 'Maximum number of results to return',
+                default: 10,
+              },
+            },
+            required: ['sessionId', 'keyword'],
+          },
+        },
+        {
+          name: 'get_requests',
+          description: 'Get all captured network requests with optional filtering.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              filter: {
+                type: 'object',
+                properties: {
+                  method: {
+                    type: 'string',
+                    description: 'Filter by HTTP method (GET, POST, etc.)',
+                  },
+                  urlContains: {
+                    type: 'string',
+                    description: 'Filter by URL containing this string',
+                  },
+                  resourceType: {
+                    type: 'string',
+                    description: 'Filter by resource type (xhr, fetch, document, etc.)',
+                  },
+                  statusCode: {
+                    type: 'number',
+                    description: 'Filter by HTTP status code',
+                  },
+                },
+              },
+              limit: {
+                type: 'number',
+                description: 'Maximum number of results to return',
+                default: 50,
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'get_request_detail',
+          description: 'Get detailed information about a specific request, including curl command.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              requestId: {
+                type: 'string',
+                description: 'The request ID',
+              },
+            },
+            required: ['sessionId', 'requestId'],
+          },
+        },
+        {
+          name: 'clear_requests',
+          description: 'Clear all captured network requests for a session.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
       ],
     };
   });
@@ -190,6 +303,18 @@ async function main() {
 
         case 'type':
           return await handleType(sessionManager, args);
+
+        case 'search_requests':
+          return await handleSearchRequests(sessionManager, args);
+
+        case 'get_requests':
+          return await handleGetRequests(sessionManager, args);
+
+        case 'get_request_detail':
+          return await handleGetRequestDetail(sessionManager, args);
+
+        case 'clear_requests':
+          return await handleClearRequests(sessionManager, args);
 
         default:
           return {
