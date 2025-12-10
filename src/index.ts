@@ -23,6 +23,10 @@ import {
   handleScreenshot,
   handleWaitForElement,
   handleGetTextContent,
+  handleQuerySelector,
+  handleGetPageContent,
+  handleScroll,
+  handleExecuteScript,
 } from './tools/index.js';
 
 /**
@@ -58,7 +62,7 @@ async function main() {
     return {
       tools: [
         {
-          name: 'create_session',
+          name: 'browser_create_session',
           description:
             'Create a new browser session. Returns a sessionId that must be used for all subsequent operations.',
           inputSchema: {
@@ -68,7 +72,7 @@ async function main() {
           },
         },
         {
-          name: 'close_session',
+          name: 'browser_close_session',
           description: 'Close an existing browser session and release resources.',
           inputSchema: {
             type: 'object',
@@ -82,7 +86,7 @@ async function main() {
           },
         },
         {
-          name: 'navigate',
+          name: 'browser_navigate',
           description: 'Navigate to a URL in the specified session.',
           inputSchema: {
             type: 'object',
@@ -110,7 +114,7 @@ async function main() {
           },
         },
         {
-          name: 'click',
+          name: 'browser_click',
           description: 'Click an element on the page.',
           inputSchema: {
             type: 'object',
@@ -141,7 +145,7 @@ async function main() {
           },
         },
         {
-          name: 'type',
+          name: 'browser_type',
           description: 'Type text into an input element.',
           inputSchema: {
             type: 'object',
@@ -176,7 +180,7 @@ async function main() {
           },
         },
         {
-          name: 'search_requests',
+          name: 'browser_search_requests',
           description: 'Search captured network requests by keyword (supports regex). Useful for finding API endpoints that contain specific data.',
           inputSchema: {
             type: 'object',
@@ -213,7 +217,7 @@ async function main() {
           },
         },
         {
-          name: 'get_requests',
+          name: 'browser_get_requests',
           description: 'Get all captured network requests with optional filtering.',
           inputSchema: {
             type: 'object',
@@ -253,7 +257,7 @@ async function main() {
           },
         },
         {
-          name: 'get_request_detail',
+          name: 'browser_get_request_detail',
           description: 'Get detailed information about a specific request, including curl command.',
           inputSchema: {
             type: 'object',
@@ -271,7 +275,7 @@ async function main() {
           },
         },
         {
-          name: 'clear_requests',
+          name: 'browser_clear_requests',
           description: 'Clear all captured network requests for a session.',
           inputSchema: {
             type: 'object',
@@ -285,7 +289,7 @@ async function main() {
           },
         },
         {
-          name: 'get_page_structure',
+          name: 'browser_get_page_structure',
           description: 'Get the structure of interactive elements on the page. Returns clickable elements like links, buttons, and inputs with their text and selectors.',
           inputSchema: {
             type: 'object',
@@ -313,7 +317,7 @@ async function main() {
           },
         },
         {
-          name: 'find_element_by_text',
+          name: 'browser_find_element_by_text',
           description: 'Find an element on the page by its text content. Returns the selector that can be used with click or type tools.',
           inputSchema: {
             type: 'object',
@@ -342,7 +346,7 @@ async function main() {
           },
         },
         {
-          name: 'screenshot',
+          name: 'browser_screenshot',
           description: 'Take a screenshot of the page or a specific element and save it to a file.',
           inputSchema: {
             type: 'object',
@@ -369,7 +373,7 @@ async function main() {
           },
         },
         {
-          name: 'wait_for_element',
+          name: 'browser_wait_for_element',
           description: 'Wait for an element to appear on the page. Useful for waiting for dynamic content to load.',
           inputSchema: {
             type: 'object',
@@ -398,7 +402,7 @@ async function main() {
           },
         },
         {
-          name: 'get_text_content',
+          name: 'browser_get_text_content',
           description: 'Get the text content of a specific element on the page.',
           inputSchema: {
             type: 'object',
@@ -415,6 +419,118 @@ async function main() {
             required: ['sessionId', 'selector'],
           },
         },
+        {
+          name: 'browser_query_selector',
+          description: 'Query elements using CSS selector and get detailed information including text, attributes, position, and visibility.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              selector: {
+                type: 'string',
+                description: 'CSS selector to query',
+              },
+              multiple: {
+                type: 'boolean',
+                description: 'Whether to return all matching elements or just the first one',
+                default: false,
+              },
+              includeAttributes: {
+                type: 'boolean',
+                description: 'Whether to include element attributes in the result',
+                default: true,
+              },
+            },
+            required: ['sessionId', 'selector'],
+          },
+        },
+        {
+          name: 'browser_get_page_content',
+          description: 'Get the content of the page or a specific element in different formats (html, text, markdown).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              format: {
+                type: 'string',
+                enum: ['html', 'text', 'markdown'],
+                description: 'Format of the content to return',
+                default: 'html',
+              },
+              selector: {
+                type: 'string',
+                description: 'Optional CSS selector to get content from a specific element',
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'browser_scroll',
+          description: 'Scroll the page to a specific position, element, or direction. Useful for loading lazy-loaded content.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              target: {
+                type: 'string',
+                enum: ['top', 'bottom', 'element'],
+                description: 'Where to scroll: top, bottom, or to a specific element',
+                default: 'bottom',
+              },
+              selector: {
+                type: 'string',
+                description: 'CSS selector of element to scroll to (required when target is "element")',
+              },
+              x: {
+                type: 'number',
+                description: 'Horizontal scroll position in pixels',
+              },
+              y: {
+                type: 'number',
+                description: 'Vertical scroll position in pixels',
+              },
+              smooth: {
+                type: 'boolean',
+                description: 'Whether to use smooth scrolling',
+                default: true,
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'browser_execute_script',
+          description: 'Execute custom JavaScript code in the browser context. Returns the result of the script execution.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              script: {
+                type: 'string',
+                description: 'JavaScript code to execute',
+              },
+              args: {
+                type: 'array',
+                description: 'Optional arguments to pass to the script',
+                default: [],
+              },
+            },
+            required: ['sessionId', 'script'],
+          },
+        },
       ],
     };
   });
@@ -425,47 +541,59 @@ async function main() {
 
     try {
       switch (name) {
-        case 'create_session':
+        case 'browser_create_session':
           return await handleCreateSession(sessionManager);
 
-        case 'close_session':
+        case 'browser_close_session':
           return await handleCloseSession(sessionManager, args);
 
-        case 'navigate':
+        case 'browser_navigate':
           return await handleNavigate(sessionManager, args);
 
-        case 'click':
+        case 'browser_click':
           return await handleClick(sessionManager, args);
 
-        case 'type':
+        case 'browser_type':
           return await handleType(sessionManager, args);
 
-        case 'search_requests':
+        case 'browser_search_requests':
           return await handleSearchRequests(sessionManager, args);
 
-        case 'get_requests':
+        case 'browser_get_requests':
           return await handleGetRequests(sessionManager, args);
 
-        case 'get_request_detail':
+        case 'browser_get_request_detail':
           return await handleGetRequestDetail(sessionManager, args);
 
-        case 'clear_requests':
+        case 'browser_clear_requests':
           return await handleClearRequests(sessionManager, args);
 
-        case 'get_page_structure':
+        case 'browser_get_page_structure':
           return await handleGetPageStructure(sessionManager, args);
 
-        case 'find_element_by_text':
+        case 'browser_find_element_by_text':
           return await handleFindElementByText(sessionManager, args);
 
-        case 'screenshot':
+        case 'browser_screenshot':
           return await handleScreenshot(sessionManager, args);
 
-        case 'wait_for_element':
+        case 'browser_wait_for_element':
           return await handleWaitForElement(sessionManager, args);
 
-        case 'get_text_content':
+        case 'browser_get_text_content':
           return await handleGetTextContent(sessionManager, args);
+
+        case 'browser_query_selector':
+          return await handleQuerySelector(sessionManager, args);
+
+        case 'browser_get_page_content':
+          return await handleGetPageContent(sessionManager, args);
+
+        case 'browser_scroll':
+          return await handleScroll(sessionManager, args);
+
+        case 'browser_execute_script':
+          return await handleExecuteScript(sessionManager, args);
 
         default:
           return {

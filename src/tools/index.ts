@@ -12,3 +12,7 @@ export { handleFindElementByText } from './find-element-by-text.js';
 export { handleScreenshot } from './screenshot.js';
 export { handleWaitForElement } from './wait-for-element.js';
 export { handleGetTextContent } from './get-text-content.js';
+export { handleQuerySelector } from './query-selector.js';
+export { handleGetPageContent } from './get-page-content.js';
+export { handleScroll } from './scroll.js';
+export { handleExecuteScript } from './execute-script.js';
