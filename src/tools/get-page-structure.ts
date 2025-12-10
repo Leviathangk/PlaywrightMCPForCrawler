@@ -92,40 +92,116 @@ export async function handleGetPageStructure(
         }
 
         function getSelector(element: any): string {
-          // Try to generate a unique selector
+          function isUnique(el: any, selector: string): boolean {
+            try {
+              // @ts-ignore - browser context
+              const matches = document.querySelectorAll(selector);
+              return matches.length === 1 && matches[0] === el;
+            } catch {
+              return false;
+            }
+          }
+
+          function getNodeSelector(node: any): string {
+            const tag = node.tagName.toLowerCase();
+            const classes = Array.from(node.classList).filter((c: any) => c && !c.startsWith('_'));
+            
+            if (classes.length > 0) {
+              const classSelector = `.${classes.join('.')}`;
+              const parent = node.parentElement;
+              if (parent) {
+                const siblings = Array.from(parent.children).filter(
+                  (el: any) => {
+                    const elClasses = Array.from(el.classList).filter((c: any) => c && !c.startsWith('_'));
+                    return elClasses.length > 0 && elClasses.join('.') === classes.join('.');
+                  }
+                );
+                if (siblings.length === 1) {
+                  return `${tag}${classSelector}`;
+                } else {
+                  const index = siblings.indexOf(node) + 1;
+                  return `${tag}${classSelector}:nth-of-type(${index})`;
+                }
+              }
+              return `${tag}${classSelector}`;
+            } else {
+              const parent = node.parentElement;
+              if (parent) {
+                const siblings = Array.from(parent.children);
+                const index = siblings.indexOf(node) + 1;
+                return `${tag}:nth-child(${index})`;
+              }
+              return tag;
+            }
+          }
+
+          function buildPathFrom(ancestor: any, target: any, maxLevels: number = 5): string {
+            const path: string[] = [];
+            let current = target;
+            let levels = 0;
+            
+            while (current && current !== ancestor && levels < maxLevels) {
+              path.unshift(getNodeSelector(current));
+              current = current.parentElement;
+              levels++;
+            }
+            
+            // Add ancestor selector
+            if (ancestor.id) {
+              path.unshift(`#${ancestor.id}`);
+            } else if (ancestor.classList && ancestor.classList.length > 0) {
+              const classes = Array.from(ancestor.classList).filter((c: any) => c && !c.startsWith('_'));
+              if (classes.length > 0) {
+                path.unshift(`${ancestor.tagName.toLowerCase()}.${classes.join('.')}`);
+              }
+            }
+            
+            return path.join(' > ');
+          }
+
+          // 1. If element has ID, return it directly
           if (element.id) {
             return `#${element.id}`;
           }
 
+          // 2. Try using only classes if unique
           const classes = Array.from(element.classList).filter((c: any) => c && !c.startsWith('_'));
           if (classes.length > 0) {
-            const classSelector = `.${classes.join('.')}`;
-            const parent = element.parentElement;
-            if (parent) {
-              const siblings = Array.from(parent.children).filter(
-                (el: any) => el.matches(classSelector)
-              );
-              if (siblings.length === 1) {
-                return classSelector;
-              }
-              const index = siblings.indexOf(element) + 1;
-              return `${classSelector}:nth-of-type(${index})`;
+            const tag = element.tagName.toLowerCase();
+            const classSelector = `${tag}.${classes.join('.')}`;
+            if (isUnique(element, classSelector)) {
+              return classSelector;
             }
-            return classSelector;
           }
 
-          // Fallback to tag with nth-child
-          const tag = element.tagName.toLowerCase();
-          const parent = element.parentElement;
-          if (parent) {
-            const siblings = Array.from(parent.children).filter(
-              (el: any) => el.tagName.toLowerCase() === tag
-            );
-            const index = siblings.indexOf(element) + 1;
-            return `${tag}:nth-child(${index})`;
+          // 3. Find unique ancestor (max 10 levels up)
+          let ancestor = element.parentElement;
+          let depth = 0;
+          const maxAncestorDepth = 10;
+          
+          while (ancestor && depth < maxAncestorDepth) {
+            // If ancestor has ID, build path from here
+            if (ancestor.id) {
+              return buildPathFrom(ancestor, element);
+            }
+            
+            // If ancestor has unique class combination
+            const ancestorClasses = Array.from(ancestor.classList).filter((c: any) => c && !c.startsWith('_'));
+            if (ancestorClasses.length > 0) {
+              const ancestorTag = ancestor.tagName.toLowerCase();
+              const ancestorSelector = `${ancestorTag}.${ancestorClasses.join('.')}`;
+              if (isUnique(ancestor, ancestorSelector)) {
+                return buildPathFrom(ancestor, element);
+              }
+            }
+            
+            ancestor = ancestor.parentElement;
+            depth++;
           }
 
-          return tag;
+          // 4. Fallback: build path from body with max 5 levels
+          // @ts-ignore - browser context
+          return buildPathFrom(document.body, element, 5);
         }
 
         function getText(element: any): string {

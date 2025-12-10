@@ -142,12 +142,13 @@ async function main() {
 
         // 10. 截图
         console.log('📸 截图保存...');
+        const screenshotPath = process.cwd() + '\\screenshots\\result.png';
         await test.callTool('screenshot', {
           sessionId: sessionId,
-          path: 'screenshots/result.png',
+          path: screenshotPath,
           fullPage: true
         });
-        console.log('✅ 截图已保存到 screenshots/result.png\n');
+        console.log(`✅ 截图已保存到 ${screenshotPath}\n`);
 
         // 11. 获取右侧内容
         console.log('📄 获取右侧内容区域文本...\n');

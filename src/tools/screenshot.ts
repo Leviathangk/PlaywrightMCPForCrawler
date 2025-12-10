@@ -41,8 +41,24 @@ export async function handleScreenshot(
   }
 
   try {
-    // Resolve path (relative to current working directory)
-    const resolvedPath = path.resolve(screenshotPath);
+    // Validate that path is absolute
+    if (!path.isAbsolute(screenshotPath)) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              errorCode: 'INVALID_PATH',
+              message: `Path must be absolute. Received: ${screenshotPath}`,
+              sessionId,
+            } as ErrorResponse),
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    const resolvedPath = screenshotPath;
 
     if (selector) {
       // Screenshot specific element
