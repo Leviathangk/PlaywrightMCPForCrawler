@@ -1,6 +1,6 @@
 {
   "name": "@leviathangk/playwright-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for browser automation and web scraping using Playwright. Supports network capture, page understanding, and AI-driven web interaction.",
   "type": "module",
   "bin": {
