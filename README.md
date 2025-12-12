@@ -1,6 +1,11 @@
 # Playwright MCP Server
 
 基于 Playwright 的 Model Context Protocol (MCP) 服务器，提供浏览器自动化功能。
+- **会话管理**：创建和管理多个独立的浏览器会话
+- **并发支持**：支持多个并发浏览器会话，自动清理过期会话
+- **浏览器操作**：导航、点击、输入等常用操作
+- **灵活配置**：支持不同浏览器（Chromium、Firefox、WebKit）和模式（有头/无头）
+- **自动清理**：会话超时后自动清理资源
 
 npm 地址：https://www.npmjs.com/package/@leviathangk/playwright-mcp
 
@@ -14,7 +19,7 @@ npm i @leviathangk/playwright-mcp
 
 ## MCP 配置
 
-在 `.kiro/settings/mcp.json` 中添加：
+在 MCP Server 中添加：
 
 ```json
 {
