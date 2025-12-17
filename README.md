@@ -50,29 +50,44 @@ npm i @leviathangk/playwright-mcp
 
 ## 核心工具
 
+### 浏览器安装
+- `browser_install` - 安装 Playwright 浏览器（chromium、firefox、webkit）
+
 ### 会话管理
 - `browser_create_session` - 创建会话
 - `browser_close_session` - 关闭会话
+
+### 页面管理（多标签页）
+- `browser_get_pages` - 获取所有打开的页面列表
+- `browser_new_page` - 创建新页面（标签页）
+- `browser_switch_page` - 切换到指定页面
+- `browser_close_page` - 关闭指定页面
 
 ### 页面操作
 - `browser_navigate` - 导航到 URL
 - `browser_click` - 点击元素
 - `browser_type` - 输入文本
 - `browser_scroll` - 滚动页面
+- `browser_wait_for_element` - 等待元素出现
+- `browser_execute_script` - 执行自定义 JavaScript
 
 ### 页面分析
 - `browser_get_page_structure` - 获取页面结构
 - `browser_find_element_by_text` - 根据文本查找元素
-- `browser_get_page_content` - 获取页面内容
+- `browser_query_selector` - 使用 CSS 选择器查询元素
+- `browser_get_page_content` - 获取页面内容（HTML/文本/Markdown）
+- `browser_get_text_content` - 获取元素文本内容
 - `browser_screenshot` - 截图
 
 ### 网络请求捕获
-- `browser_search_requests` - 搜索请求
+- `browser_search_requests` - 搜索请求（支持正则）
 - `browser_get_requests` - 获取所有请求
 - `browser_get_request_detail` - 获取请求详情（含 curl）
 - `browser_clear_requests` - 清空请求历史
 
 ## 使用示例
+
+### 基础使用
 
 ```javascript
 // 1. 创建会话
@@ -100,6 +115,71 @@ const detail = await callTool('browser_get_request_detail', {
 // 5. 关闭会话
 await callTool('browser_close_session', {
   sessionId: session.sessionId
+});
+```
+
+### 多标签页管理
+
+```javascript
+// 获取所有页面
+const pages = await callTool('browser_get_pages', {
+  sessionId: sessionId
+});
+console.log(`总共 ${pages.totalPages} 个页面`);
+pages.pages.forEach(page => {
+  console.log(`${page.index}: ${page.title} ${page.isActive ? '(当前)' : ''}`);
+});
+
+// 创建新页面
+await callTool('browser_new_page', {
+  sessionId: sessionId,
+  url: 'https://www.example.com'
+});
+
+// 切换到指定页面
+await callTool('browser_switch_page', {
+  sessionId: sessionId,
+  pageIndex: 1
+});
+
+// 关闭页面
+await callTool('browser_close_page', {
+  sessionId: sessionId,
+  pageIndex: 2
+});
+```
+
+### 页面分析
+
+```javascript
+// 获取页面结构
+const structure = await callTool('browser_get_page_structure', {
+  sessionId: sessionId,
+  maxElements: 50
+});
+
+// 查找元素
+const element = await callTool('browser_find_element_by_text', {
+  sessionId: sessionId,
+  text: '登录'
+});
+
+// 点击元素
+await callTool('browser_click', {
+  sessionId: sessionId,
+  selector: element.selector
+});
+
+// 获取页面内容
+const content = await callTool('browser_get_page_content', {
+  sessionId: sessionId,
+  format: 'html'
+});
+
+// 执行自定义脚本
+const result = await callTool('browser_execute_script', {
+  sessionId: sessionId,
+  script: 'return document.title;'
 });
 ```
 

@@ -28,6 +28,10 @@ import {
   handleScroll,
   handleExecuteScript,
   handleInstallBrowser,
+  handleGetPages,
+  handleNewPage,
+  handleSwitchPage,
+  handleClosePage,
 } from './tools/index.js';
 
 /**
@@ -554,6 +558,74 @@ async function main() {
             required: ['sessionId', 'script'],
           },
         },
+        {
+          name: 'browser_get_pages',
+          description: 'Get a list of all open pages (tabs) in the session, including which page is currently active.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'browser_new_page',
+          description: 'Create a new page (tab) in the session and optionally navigate to a URL.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              url: {
+                type: 'string',
+                description: 'Optional URL to navigate to in the new page',
+              },
+            },
+            required: ['sessionId'],
+          },
+        },
+        {
+          name: 'browser_switch_page',
+          description: 'Switch to a different page (tab) by its index. Use browser_get_pages to see available pages.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              pageIndex: {
+                type: 'number',
+                description: 'The index of the page to switch to (0-based)',
+              },
+            },
+            required: ['sessionId', 'pageIndex'],
+          },
+        },
+        {
+          name: 'browser_close_page',
+          description: 'Close a specific page (tab) by its index. Cannot close the last remaining page.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              sessionId: {
+                type: 'string',
+                description: 'The session ID',
+              },
+              pageIndex: {
+                type: 'number',
+                description: 'The index of the page to close (0-based)',
+              },
+            },
+            required: ['sessionId', 'pageIndex'],
+          },
+        },
       ],
     };
   });
@@ -620,6 +692,18 @@ async function main() {
 
         case 'browser_execute_script':
           return await handleExecuteScript(sessionManager, args);
+
+        case 'browser_get_pages':
+          return await handleGetPages(sessionManager, args);
+
+        case 'browser_new_page':
+          return await handleNewPage(sessionManager, args);
+
+        case 'browser_switch_page':
+          return await handleSwitchPage(sessionManager, args);
+
+        case 'browser_close_page':
+          return await handleClosePage(sessionManager, args);
 
         default:
           return {

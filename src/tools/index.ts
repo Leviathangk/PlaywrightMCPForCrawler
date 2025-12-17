@@ -17,3 +17,7 @@ export { handleGetPageContent } from './get-page-content.js';
 export { handleScroll } from './scroll.js';
 export { handleExecuteScript } from './execute-script.js';
 export { handleInstallBrowser } from './install-browser.js';
+export { handleGetPages } from './get-pages.js';
+export { handleNewPage } from './new-page.js';
+export { handleSwitchPage } from './switch-page.js';
+export { handleClosePage } from './close-page.js';
